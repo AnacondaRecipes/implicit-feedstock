@@ -21,23 +21,27 @@ requirements:
   host:
     - python
     - pip
-    - cython >=0.24
-    - scipy >=0.16
-    - scikit-build >=0.15
+    - wheel
+    - cython 0.29
+    - scipy 1.10
+    - scikit-build 0.15
   run:
     - {{ pin_compatible('numpy') }}
     - {{ pin_compatible('scipy') }}
     - python
     - tqdm >=4.27
     - _openmp_mutex           # [linux]
+    - llvm-openmp             # [osx]
 
 test:
   imports:
     - implicit
     - implicit.cpu._als
+  commands:
+    - pip check
 
 about:
-  home: http://github.com/benfred/implicit/
+  home: https://github.com/benfred/implicit/
   license: MIT
   license_family: MIT
   license_file: LICENSE
@@ -47,8 +51,8 @@ about:
     described in the paper Collaborative Filtering for Implicit Feedback
     Datasets and in Applications of the Conjugate Gradient Method
     for Implicit Feedback Collaborative Filtering
-  doc_url: http://implicit.readthedocs.io/
-  dev_url: http://github.com/benfred/implicit/
+  doc_url: https://implicit.readthedocs.io/
+  dev_url: https://github.com/benfred/implicit/
 
 extra:
   recipe-maintainers:
