@@ -34,6 +34,8 @@ requirements:
     - llvm-openmp             # [osx]
 
 test:
+  requires:
+    - pip
   imports:
     - implicit
     - implicit.cpu._als
