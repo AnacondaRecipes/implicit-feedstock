@@ -13,7 +13,7 @@ build:
   number: 0
   script_env:
     - CMAKE_GENERATOR=Ninja
-  script: python -m pip install . -vv --no-deps --no-build-isolation --ignore-installed
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation --ignore-installed
 
 requirements:
   build:
