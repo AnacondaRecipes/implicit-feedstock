@@ -14,13 +14,15 @@ build:
   script_env:
     - CMAKE_GENERATOR=Ninja
   script: python -m pip install . -vv --no-deps --no-build-isolation --ignore-installed
+  skip: true  # [win]
 
 requirements:
   build:
-    - {{ compiler('c') }}
     - {{ stdlib("c") }}
+    - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    # cmake >=4 is not supported
+    # CMake 4.x dropped compatibility with policy versions below 3.5,
+    # so projects declaring cmake_minimum_required(VERSION 3.1)
     - cmake >=3.18,<4
     - ninja-base
   host:
@@ -38,25 +40,46 @@ requirements:
     - scipy >=0.16
     - tqdm >=4.27
     - threadpoolctl
+    - _openmp_mutex           # [linux]
+    - llvm-openmp             # [osx]
 
 test:
   imports:
     - implicit
     - implicit.cpu._als
   commands:
+    - pip check
     - python -c "import implicit; print(implicit.__version__)"
+  requires:
+    - pip
 
 about:
-  home: http://github.com/benfred/implicit
+  home: https://github.com/benfred/implicit
   license: MIT
   license_family: MIT
   license_file: LICENSE
   summary: Fast Python Collaborative Filtering for Implicit Datasets.
-  doc_url: http://implicit.readthedocs.io
-  dev_url: http://github.com/benfred/implicit
+  description: |
+    Fast Python Collaborative Filtering for Implicit Datasets.
+    This project provides fast Python implementationsof several different
+    popular recommendation algorithms for implicit feedback datasets:
+      Alternating Least Squares as described in the papers Collaborative Filtering for Implicit Feedback Datasets and
+      Applications of the Conjugate Gradient Method for Implicit Feedback Collaborative Filtering.
+      Bayesian Personalized Ranking.
+      Logistic Matrix Factorization
+      Item-Item Nearest Neighbour models using Cosine, TFIDF or BM25 as a distance metric.
+    All models have multi-threaded training routines, using Cython and
+    OpenMP to fit the models in parallel among all available CPU cores.
+    In addition, the ALS and BPR models both have custom CUDA kernels - enabling fitting on compatible GPU's.
+     Approximate nearest neighbours libraries such as Annoy, NMSLIB and Faiss can also be used by Implicit
+     to speed up making recommendations.
+  doc_url: https://implicit.readthedocs.io
+  dev_url: https://github.com/benfred/implicit
 
 
 extra:
   recipe-maintainers:
     - rth
     - benfred
+  skip-lints:
+    - host_section_needs_exact_pinnings
