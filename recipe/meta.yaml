@@ -2,11 +2,11 @@
 {% set version = "0.7.2" %}
 
 package:
-  name: {{ name|lower }}
+  name: {{ name }}
   version: {{ version }}
 
 source:
-  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  url: https://github.com/benfred/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
   sha256: bacf79120c87ad0744a4365a089409fddd33231880aef4a495bab2d4f888291d
 
 build:
@@ -14,15 +14,14 @@ build:
   script_env:
     - CMAKE_GENERATOR=Ninja
   script: python -m pip install . -vv --no-deps --no-build-isolation --ignore-installed
-  skip: true  # [win]
 
 requirements:
   build:
-    - {{ stdlib("c") }}
+    - {{ stdlib('c') }}
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    # CMake 4.x dropped compatibility with policy versions below 3.5,
-    # so projects declaring cmake_minimum_required(VERSION 3.1)
+    # CMake 4.x dropped compatibility with policy versions below 3.5, so projects
+    # declaring cmake_minimum_required(VERSION 3.1), and build was failed.
     - cmake >=3.18,<4
     - ninja-base
   host:
@@ -40,18 +39,23 @@ requirements:
     - scipy >=0.16
     - tqdm >=4.27
     - threadpoolctl
+    # OPENMP -> https://github.com/benfred/implicit/blob/v0.7.2/CMakeLists.txt#L9
     - _openmp_mutex           # [linux]
     - llvm-openmp             # [osx]
 
 test:
+  source_files:
+    - tests
   imports:
     - implicit
     - implicit.cpu._als
   commands:
     - pip check
     - python -c "import implicit; print(implicit.__version__)"
+    - pytest -v tests
   requires:
     - pip
+    - pytest
 
 about:
   home: https://github.com/benfred/implicit
