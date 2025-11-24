@@ -1,98 +1,60 @@
-{% set implicit_proc_type = "cpu" %}
 {% set name = "implicit" %}
-{% set version = "0.5.2" %}
-{% set sha256 = "bf4674a898251d89dd54d8a11a82f488edcc2ff2a9923a37dd0b271453e417d9" %}
-
-{% set implicit_proc_type = "cpu" if cuda_compiler_version == "None" else "gpu" %}  # [linux64]
-{% set implicit_proc_type = "cpu" %}                                                # [not linux64]
-
+{% set version = "0.7.2" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: {{ sha256 }}
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: bacf79120c87ad0744a4365a089409fddd33231880aef4a495bab2d4f888291d
 
 build:
-  number: 1
-  skip: true  # [win and py27]
-  skip: true  # [cuda_compiler_version == "10.2"]
-  skip: true  # [python_impl == "pypy"]
+  number: 0
+  script_env:
+    - CMAKE_GENERATOR=Ninja
+  script: python -m pip install . -vv --no-deps --no-build-isolation --ignore-installed
 
-outputs:
-  - name: implicit-proc
-    version: {{ version }}
-    build:
-      number: 1
-      string: {{ implicit_proc_type }}
-    test:
-      commands:
-        - exit 0
-    about:
-      home: https://github.com/conda-forge/implicit-feedstock
-      license: BSD-3-Clause
-      license_family: BSD
-      summary: A meta-package to select CPU or GPU implicit build.
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ stdlib("c") }}
+    - {{ compiler('cxx') }}
+    # cmake >=4 is not supported
+    - cmake >=3.18,<4
+    - ninja-base
+  host:
+    - pip
+    - python
+    - wheel
+    - setuptools >=42
+    - cython >=0.24
+    - scikit-build >=0.13.1
+    - scipy >=0.16
+    - numpy {{ numpy }}
+  run:
+    - python
+    - numpy >=1.17.0
+    - scipy >=0.16
+    - tqdm >=4.27
+    - threadpoolctl
 
-  - name: implicit
-    build:
-      number: 1
-      script: python -m pip install . --no-deps -vv
-
-    requirements:
-      build:
-        - {{ compiler('c') }}
-        - {{ compiler('cxx') }}
-        - {{ compiler('cuda') }}  # [linux64 and cuda_compiler_version != "None"]
-        - make  # [linux64]
-      host:
-        - python
-        - pip
-        - cython >=0.24
-        # implicit cimports BLAS from scipy
-        - scipy >=0.16
-      run:
-        - python
-        - {{ pin_compatible('numpy') }}
-        - {{ pin_compatible('scipy') }}
-        - tqdm >=4.27
-      run_constrained:
-        - implicit-proc * {{ implicit_proc_type }}
-
-    test:
-      imports:
-        - implicit
-        - implicit.cpu._als
-
-    about:
-      home: http://github.com/benfred/implicit/
-      license: MIT
-      license_family: MIT
-      license_file: LICENSE
-      summary: Fast Python Collaborative Filtering for Implicit Datasets.
-      description: |
-        This project provides fast Python implementations of the algorithms
-        described in the paper Collaborative Filtering for Implicit Feedback
-        Datasets and in Applications of the Conjugate Gradient Method
-        for Implicit Feedback Collaborative Filtering
-      doc_url: http://implicit.readthedocs.io/
-      dev_url: http://github.com/benfred/implicit/
+test:
+  imports:
+    - implicit
+    - implicit.cpu._als
+  commands:
+    - python -c "import implicit; print(implicit.__version__)"
 
 about:
-  home: http://github.com/benfred/implicit/
+  home: http://github.com/benfred/implicit
   license: MIT
   license_family: MIT
   license_file: LICENSE
   summary: Fast Python Collaborative Filtering for Implicit Datasets.
-  description: |
-    This project provides fast Python implementations of the algorithms
-    described in the paper Collaborative Filtering for Implicit Feedback
-    Datasets and in Applications of the Conjugate Gradient Method
-    for Implicit Feedback Collaborative Filtering
-  doc_url: http://implicit.readthedocs.io/
-  dev_url: http://github.com/benfred/implicit/
+  doc_url: http://implicit.readthedocs.io
+  dev_url: http://github.com/benfred/implicit
+
 
 extra:
   recipe-maintainers:
