@@ -50,6 +50,7 @@ requirements:
 # Issue: https://github.com/benfred/implicit/issues/740
 # E   ValueError: Buffer dtype mismatch, expected 'long' but got 'long long'
 {% set ignore_tests = " --ignore=tests/knn_test.py" %}  # [win]
+{% set ignore_tests = ignore_tests + " -k \"not test_evaluation\"" %}  # [py>=314]
 test:
   source_files:
     - tests
@@ -64,7 +65,7 @@ test:
     - pip
     - pytest
     # https://github.com/benfred/implicit/issues/726
-    - scipy <1.15
+    - scipy <1.15  # [py<314]
 
 about:
   home: https://github.com/benfred/implicit
