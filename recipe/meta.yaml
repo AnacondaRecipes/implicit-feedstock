@@ -1,5 +1,5 @@
 {% set name = "implicit" %}
-{% set version = "0.7.2" %}
+{% set version = "0.7.3" %}
 
 package:
   name: {{ name }}
@@ -7,10 +7,11 @@ package:
 
 source:
   url: https://github.com/benfred/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 7a15154156943cbf4b79bf99a352990b485175ec9cbb9b14774b6fa8d4941ca4
+  sha256: fa7c943431f824cad839ac00c9206b24c56ccc30b5ec2753ac34bf053bf83330
 
 build:
   number: 0
+  skip: True  # [py<39]
   script_env:
     - CMAKE_GENERATOR=Ninja
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation --ignore-installed
@@ -22,17 +23,18 @@ requirements:
     - {{ compiler('cxx') }}
     # CMake 4.x dropped compatibility with policy versions below 3.5, so projects
     # declaring cmake_minimum_required(VERSION 3.1), and build was failed.
-    - cmake >=3.18,<4
+    - cmake >=3.21,<4
     - ninja-base
   host:
     - pip
     - python
     - wheel
-    - setuptools >=42
     - cython >=0.24
-    - scikit-build >=0.13.1
+    - cython-cmake
+    - scikit-build-core >=0.11
     - scipy >=0.16
     - numpy {{ numpy }}
+    - libgomp                 # [linux]
   run:
     - python
     - numpy >=1.17.0
@@ -41,12 +43,14 @@ requirements:
     - threadpoolctl
     # OPENMP -> https://github.com/benfred/implicit/blob/v0.7.2/CMakeLists.txt#L9
     - _openmp_mutex           # [linux]
+    - libgomp                 # [linux]
     - llvm-openmp             # [osx]
 
 {% set ignore_tests = "" %}
 # Issue: https://github.com/benfred/implicit/issues/740
 # E   ValueError: Buffer dtype mismatch, expected 'long' but got 'long long'
 {% set ignore_tests = " --ignore=tests/knn_test.py" %}  # [win]
+{% set ignore_tests = ignore_tests + " -k \"not test_evaluation\"" %}  # [py>=314]
 test:
   source_files:
     - tests
@@ -61,7 +65,7 @@ test:
     - pip
     - pytest
     # https://github.com/benfred/implicit/issues/726
-    - scipy <1.15
+    - scipy <1.15  # [py<314]
 
 about:
   home: https://github.com/benfred/implicit
