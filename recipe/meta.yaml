@@ -10,7 +10,7 @@ source:
   sha256: fa7c943431f824cad839ac00c9206b24c56ccc30b5ec2753ac34bf053bf83330
 
 build:
-  number: 0
+  number: 1
   skip: True  # [py<39]
   script_env:
     - CMAKE_GENERATOR=Ninja
